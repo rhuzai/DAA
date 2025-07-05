@@ -1,0 +1,136 @@
+
+Input: Adjacency list of an undirected weighted graph with V vertices
+Output: Minimum Spanning Tree (MST) and its total weight
+
+1. Initialize:
+    - key[0..V-1] = ∞
+    - parent[0..V-1] = -1
+    - inMST[0..V-1] = false
+    - key[0] = 0
+    - Min Heap pq = [(0, 0)]  // (vertex, weight)
+
+2. While pq is not empty:
+    a. u = extract the vertex with the smallest key from pq
+    b. Mark inMST[u] = true
+    c. For each neighbor (v, weight) of u:
+        i. If v is not in MST and weight < key[v]:
+            - key[v] = weight
+            - parent[v] = u
+            - Add (v, weight) to pq
+
+3. Output the MST using parent[] and key[] arrays.
+
+
+//code
+import java.util.*;
+
+class Pair {
+    int vertex;
+    int weight;
+    Pair(int v, int w) {
+        this.vertex = v;
+        this.weight = w;
+    }
+}
+
+public class PrimsOptimized {
+
+    // Prim's algorithm using PriorityQueue and adjacency list
+    static void primMST(List<List<Pair>> adj, int V) {
+        int[] key = new int[V]; // Minimum weight to connect
+        int[] parent = new int[V]; // To store MST
+        boolean[] inMST = new boolean[V]; // To track included vertices
+
+        // Initialize all keys to infinity
+        Arrays.fill(key, Integer.MAX_VALUE);
+        key[0] = 0;       // Start from vertex 0
+        parent[0] = -1;
+
+        // Min-heap to store (key, vertex)
+        PriorityQueue<Pair> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a.weight));
+        pq.add(new Pair(0, 0));
+
+        while (!pq.isEmpty()) {
+            int u = pq.poll().vertex;
+            inMST[u] = true;
+
+            for (Pair neighbor : adj.get(u)) {
+                int v = neighbor.vertex;
+                int weight = neighbor.weight;
+
+                if (!inMST[v] && weight < key[v]) {
+                    key[v] = weight;
+                    parent[v] = u;
+                    pq.add(new Pair(v, weight));
+                }
+            }
+        }
+
+        // Print MST
+        int totalWeight = 0;
+        System.out.println("Edge \tWeight");
+        for (int i = 1; i < V; i++) {
+            System.out.println(parent[i] + " - " + i + "\t" + key[i]);
+            totalWeight += key[i];
+        }
+        System.out.println("Total Weight of MST: " + totalWeight);
+    }
+
+    // Main function
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of vertices: ");
+        int V = sc.nextInt();
+
+        System.out.print("Enter number of edges: ");
+        int E = sc.nextInt();
+
+        // Create adjacency list
+        List<List<Pair>> adj = new ArrayList<>();
+        for (int i = 0; i < V; i++)
+            adj.add(new ArrayList<>());
+
+        System.out.println("Enter each edge (u v weight):");
+        for (int i = 0; i < E; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            int w = sc.nextInt();
+            adj.get(u).add(new Pair(v, w));
+            adj.get(v).add(new Pair(u, w)); // Because undirected
+        }
+
+        System.out.println("\nMinimum Spanning Tree using Prim's Algorithm:");
+        primMST(adj, V);
+
+        sc.close();
+    }
+}
+Enter number of vertices: 5
+Enter number of edges: 6
+Enter each edge (u v weight):
+0 1 2
+0 3 6
+1 2 3
+1 3 8
+1 4 5
+2 4 7
+Minimum Spanning Tree using Prim's Algorithm:
+Edge    Weight
+0 - 1   2
+1 - 2   3
+1 - 4   5
+0 - 3   6
+Total Weight of MST: 16
+
+
+Time complexity Analysis:
+Let:
+V = Number of vertices
+E = Number of edges
+Operations Breakdown:
+Initializing keys and arrays: O(V)
+Each vertex is added to the priority queue once, and extracted once: O(V log V)
+For each edge, we may update the key and insert/update into priority queue: O(E log V) (using binary heap)
+Total Time Complexity: O((V + E) log V)
+Efficient for sparse graphs where E is much less than V².
