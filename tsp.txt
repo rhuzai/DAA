@@ -1,0 +1,110 @@
+Design Technique: Dynamic Programming with Bitmasking
+
+Algorithm TSP_HeldKarp(graph)
+    Input: 
+        graph: 2D matrix representing cost between cities
+    Output: 
+        Minimum cost of visiting all cities exactly once and returning to origin
+
+    n = number of cities
+    dp = array of size [2^n][n] initialized to ∞
+    dp[1][0] = 0    // Starting from city 0
+
+    for mask = 1 to 2^n - 1 do
+        for u = 0 to n - 1 do
+            if mask & (1 << u) != 0 then
+                for v = 0 to n - 1 do
+                    if mask & (1 << v) == 0 AND graph[u][v] != 0 then
+                        nextMask = mask | (1 << v)
+                        dp[nextMask][v] = min(dp[nextMask][v], dp[mask][u] + graph[u][v])
+
+    ans = ∞
+    for i = 1 to n - 1 do
+        if graph[i][0] != 0 then
+            ans = min(ans, dp[2^n - 1][i] + graph[i][0])
+
+    return ans
+
+//code
+
+import java.util.*;
+
+public class TSPHeldKarp {
+
+    static final int INF = Integer.MAX_VALUE / 2;
+
+    public static int tsp(int[][] graph) {
+        int n = graph.length;
+        int[][] dp = new int[1 << n][n];
+
+        for (int[] row : dp) Arrays.fill(row, INF);
+        dp[1][0] = 0; // Start from city 0
+
+        for (int mask = 1; mask < (1 << n); mask++) {
+            for (int u = 0; u < n; u++) {
+                if ((mask & (1 << u)) != 0) {
+                    for (int v = 0; v < n; v++) {
+                        if ((mask & (1 << v)) == 0 && graph[u][v] != 0) {
+                            int nextMask = mask | (1 << v);
+                            dp[nextMask][v] = Math.min(dp[nextMask][v], dp[mask][u] + graph[u][v]);
+                        }
+                    }
+                }
+            }
+        }
+
+        int minCost = INF;
+        for (int i = 1; i < n; i++) {
+            if (graph[i][0] != 0)
+                minCost = Math.min(minCost, dp[(1 << n) - 1][i] + graph[i][0]);
+        }
+
+        return minCost;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of cities: ");
+        int n = sc.nextInt();
+
+        int[][] graph = new int[n][n];
+        System.out.println("Enter the cost matrix:");
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                graph[i][j] = sc.nextInt();
+
+        long startTime = System.currentTimeMillis();
+        int minCost = tsp(graph);
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Minimum TSP tour cost: " + minCost);
+        System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
+    }
+}
+
+Enter number of cities: 4
+Enter the cost matrix:
+0 10 15 20
+10 0 35 25
+15 35 0 30
+20 25 30 0
+
+Minimum TSP tour cost: 80
+Execution time: 0 milliseconds
+
+Time Complexity:
+
+Size of the DP Table:
+Total subsets (bitmask): 2^n
+For each subset, we store the minimum cost for ending in each of the n cities.
+So total entries: 2^n *n
+For each entry:
+Loop over all u and for each v not in mask, try transitions.
+So total transitions ≈ n×2^n×n
+⇒ Time Complexity = O(n² × 2ⁿ)
+
+Brute Force Time Complexity: 
+O(n!)
+Held-Karp Time Complexity: 
+O(n^2 * 2^n)
