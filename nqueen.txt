@@ -1,0 +1,136 @@
+Design Technique:
+Backtracking – We try to place a queen (or server) in each row, one by one, and backtrack if a conflict occurs.
+
+function solveNQueens(N):
+    board = NxN matrix initialized with 0
+    if placeQueens(board, 0, N):
+        printSolution(board)
+    else:
+        print "No solution exists"
+
+function placeQueens(board, row, N):
+    if row == N:
+        return true  // All queens placed
+
+    for col in 0 to N-1:
+        if isSafe(board, row, col, N):
+            board[row][col] = 1  // Place queen
+            if placeQueens(board, row + 1, N):
+                return true
+            board[row][col] = 0  // Backtrack
+    return false
+
+function isSafe(board, row, col, N):
+    // Check same column
+    for i in 0 to row-1:
+        if board[i][col] == 1:
+            return false
+
+    // Check upper-left diagonal
+    for i, j = row-1, col-1 while i >= 0 and j >= 0:
+        if board[i][j] == 1:
+            return false
+
+    // Check upper-right diagonal
+    for i, j = row-1, col+1 while i >= 0 and j < N:
+        if board[i][j] == 1:
+            return false
+
+    return true
+
+//code
+import java.util.Scanner;
+
+public class NQueens {
+    static int N;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter value of N (board size): ");
+        N = scanner.nextInt();
+
+        int[][] board = new int[N][N];
+
+        long startTime = System.currentTimeMillis();
+
+        if (solveNQueens(board, 0)) {
+            long endTime = System.currentTimeMillis();
+            System.out.println("Solution found:");
+            printBoard(board);
+            System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
+        } else {
+            long endTime = System.currentTimeMillis();
+            System.out.println("No solution exists.");
+            System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
+        }
+
+        scanner.close();
+    }
+
+    // Recursive backtracking function
+    static boolean solveNQueens(int[][] board, int row) {
+        if (row == N) {
+            return true;
+        }
+
+        for (int col = 0; col < N; col++) {
+            if (isSafe(board, row, col)) {
+                board[row][col] = 1;
+                if (solveNQueens(board, row + 1)) {
+                    return true;
+                }
+                board[row][col] = 0; // Backtrack
+            }
+        }
+        return false;
+    }
+
+    // Check if it's safe to place a queen at board[row][col]
+    static boolean isSafe(int[][] board, int row, int col) {
+        // Check same column
+        for (int i = 0; i < row; i++)
+            if (board[i][col] == 1)
+                return false;
+
+        // Check upper-left diagonal
+        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--)
+            if (board[i][j] == 1)
+                return false;
+
+        // Check upper-right diagonal
+        for (int i = row - 1, j = col + 1; i >= 0 && j < N; i--, j++)
+            if (board[i][j] == 1)
+                return false;
+
+        return true;
+    }
+
+    // Print the board
+    static void printBoard(int[][] board) {
+        for (int[] row : board) {
+            for (int cell : row)
+                System.out.print(cell + " ");
+            System.out.println();
+        }
+    }
+}
+
+Enter value of N (board size): 4
+Solution found:
+0 1 0 0 
+0 0 0 1 
+1 0 0 0 
+0 0 1 0 
+Execution time: 1 milliseconds
+
+Time Complexity 
+worst case : 
+Time Complexity = O(N!)
+Because the algorithm potentially checks N! permutations of queen placements across N rows.
+
+Best Case:
+In optimal scenarios (like smaller N), a solution might be found early, and backtracking may not go deep.
+Still, the asymptotic complexity remains O(N!) because of recursive depth and branching.
+
+
