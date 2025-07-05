@@ -1,0 +1,114 @@
+Design Technique Used: Dynamic Programming
+Input: 
+    Integer n  // Number of items
+    Integer W  // Maximum capacity of knapsack
+    Array weights[0..n-1]  // Weights of the items
+    Array values[0..n-1]   // Values of the items
+
+Output: 
+    Maximum value that can be carried in the knapsack
+
+Algorithm:
+1. Create a 2D array dp[0..n][0..W], where dp[i][w] represents the 
+   maximum value that can be attained using the first i items with 
+   weight limit w
+
+2. Initialize all dp[0][w] = 0 for w = 0 to W
+   Initialize all dp[i][0] = 0 for i = 0 to n
+
+3. For i = 1 to n:
+       For w = 1 to W:
+           If weights[i-1] <= w:
+               dp[i][w] = max(values[i-1] + dp[i-1][w - weights[i-1]], 
+                              dp[i-1][w])
+           Else:
+               dp[i][w] = dp[i-1][w]
+
+4. Return dp[n][W] as the result
+
+//code
+import java.util.Scanner;
+
+public class Knapsack {
+    public static int knapsack(int[] weights, int[] values, int capacity, int n) {
+        int[][] dp = new int[n + 1][capacity + 1];
+
+        // Build table dp[][] in bottom-up manner
+        for (int i = 0; i <= n; i++) {
+            for (int w = 0; w <= capacity; w++) {
+                if (i == 0 || w == 0)
+                    dp[i][w] = 0;
+                else if (weights[i - 1] <= w)
+                    dp[i][w] = Math.max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+                else
+                    dp[i][w] = dp[i - 1][w];
+            }
+        }
+
+        return dp[n][capacity];
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input: number of items
+        System.out.print("Enter number of items: ");
+        int n = sc.nextInt();
+
+        int[] weights = new int[n];
+        int[] values = new int[n];
+
+        // Input: weights
+        System.out.println("Enter weights of items:");
+        for (int i = 0; i < n; i++) {
+            weights[i] = sc.nextInt();
+        }
+
+        // Input: values
+        System.out.println("Enter values of items:");
+        for (int i = 0; i < n; i++) {
+            values[i] = sc.nextInt();
+        }
+
+        // Input: knapsack capacity
+        System.out.print("Enter knapsack capacity: ");
+        int capacity = sc.nextInt();
+
+        // Start time
+        long startTime = System.currentTimeMillis();
+
+        // Call knapsack function
+        int maxValue = knapsack(weights, values, capacity, n);
+
+        // End time
+        long endTime = System.currentTimeMillis();
+
+        // Output
+        System.out.println("Maximum value in Knapsack: " + maxValue);
+        System.out.println("Execution time: " + (endTime - startTime) + " ms");
+    }
+}
+
+Enter number of items: 4
+Enter weights of items:
+2 3 4 5
+Enter values of items:
+3 4 5 6
+Enter knapsack capacity: 5
+
+Maximum value in Knapsack: 7
+Execution time: 1 ms
+
+
+Time Complexity: 
+We fill a 2D table of size (n + 1) × (W + 1).
+
+Each cell dp[i][w] is computed in O(1) time using:
+Time Complexity = O(n × W)
+This is pseudo-polynomial time complexity:
+
+Polynomial in n and W
+
+But not polynomial in input size (since W can be very large and take many bits to represent)
+
+Hence, 0/1 Knapsack is NP-Complete
