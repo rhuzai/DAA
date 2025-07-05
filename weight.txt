@@ -1,0 +1,130 @@
+Design Technique: Dynamic Programming (DP)
+Algorithm WeightedIntervalScheduling(intervals):
+    Input: intervals[] where each interval has (start, finish, weight)
+    Output: maximum total weight of non-overlapping intervals
+
+    1. Sort intervals by finish time (ascending)
+    2. Create array dp[0..n-1]
+    3. For each interval i in 0 to n-1:
+          p[i] = index of the last interval that doesn't conflict with i
+          (p[i] = -1 if no such interval exists)
+    4. dp[0] = intervals[0].weight
+
+    5. For i = 1 to n-1:
+          inclWeight = intervals[i].weight
+          if p[i] != -1:
+              inclWeight = inclWeight + dp[p[i]]
+
+          dp[i] = max(inclWeight, dp[i-1])
+
+    6. return dp[n-1]
+
+
+Function LatestNonConflict(intervals, i):
+    // Binary search for last interval j < i with intervals[j].finish <= intervals[i].start
+    low = 0
+    high = i - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if intervals[mid].finish <= intervals[i].start:
+            if intervals[mid + 1].finish <= intervals[i].start:
+                low = mid + 1
+            else:
+                return mid
+        else:
+            high = mid - 1
+    return -1
+
+
+
+import java.util.*;
+
+public class WeightedIntervalScheduling {
+
+    static class Interval implements Comparable<Interval> {
+        int start, finish, weight;
+        public Interval(int s, int f, int w) {
+            start = s;
+            finish = f;
+            weight = w;
+        }
+        public int compareTo(Interval other) {
+            return this.finish - other.finish;
+        }
+    }
+
+    // Binary search to find the last interval that doesn't conflict
+    static int latestNonConflict(Interval[] intervals, int i) {
+        int low = 0, high = i - 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (intervals[mid].finish <= intervals[i].start) {
+                if (intervals[mid + 1].finish <= intervals[i].start)
+                    low = mid + 1;
+                else
+                    return mid;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return -1;
+    }
+
+    // Weighted Interval Scheduling DP function
+    static int findMaxWeight(Interval[] intervals) {
+        Arrays.sort(intervals);
+
+        int n = intervals.length;
+        int[] dp = new int[n];
+        dp[0] = intervals[0].weight;
+
+        for (int i = 1; i < n; i++) {
+            int inclWeight = intervals[i].weight;
+            int l = latestNonConflict(intervals, i);
+            if (l != -1) {
+                inclWeight += dp[l];
+            }
+            dp[i] = Math.max(inclWeight, dp[i - 1]);
+        }
+        return dp[n - 1];
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of intervals: ");
+        int n = sc.nextInt();
+        Interval[] intervals = new Interval[n];
+
+        System.out.println("Enter intervals as: start finish weight");
+        for (int i = 0; i < n; i++) {
+            int s = sc.nextInt();
+            int f = sc.nextInt();
+            int w = sc.nextInt();
+            intervals[i] = new Interval(s, f, w);
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        int maxWeight = findMaxWeight(intervals);
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Maximum weight of non-overlapping intervals: " + maxWeight);
+        System.out.println("Execution time: " + (endTime - startTime) + " ms");
+    }
+}
+Enter number of intervals: 4
+Enter intervals as: start finish weight
+1 3 5
+2 5 6
+4 6 5
+6 7 4
+
+Maximum weight of non-overlapping intervals: 10
+Execution time: 1 ms
+
+Operation	Complexity	Description
+Sort intervals	O(nlogn)	Sort intervals by finish time
+Compute p[i] (latest non-conflict) O(nlogn)	Binary search for each interval
+DP table calculation	O(n)	Compute max weight up to each interval
+Total Time Complexity	O(nlogn)	Efficient for large input sizes
