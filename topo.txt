@@ -1,0 +1,133 @@
+Algorithm TopologicalSortKahn(Graph):
+    Input: 
+        - Graph as adjacency list (vertices V and edges E)
+    Output:
+        - List of vertices in topological order OR message indicating a cycle
+
+    1. Initialize inDegree[0..V-1] ← 0
+
+    2. For each vertex u in Graph:
+           For each neighbor v of u:
+               inDegree[v] ← inDegree[v] + 1
+
+    3. Initialize an empty queue Q
+
+    4. For each vertex i from 0 to V-1:
+           If inDegree[i] == 0:
+               Enqueue(Q, i)
+
+    5. Initialize empty list TopoOrder
+
+    6. While Q is not empty:
+           u ← Dequeue(Q)
+           Add u to TopoOrder
+
+           For each neighbor v of u:
+               inDegree[v] ← inDegree[v] - 1
+               If inDegree[v] == 0:
+                   Enqueue(Q, v)
+
+    7. If size of TopoOrder < V:
+           Output "The graph has a cycle. Topological sort not possible."
+       Else:
+           Output TopoOrder
+
+
+//code
+import java.util.*;
+
+public class TopologicalSort {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Step 1: Input number of vertices and edges
+        System.out.print("Enter number of vertices: ");
+        int V = sc.nextInt();
+        System.out.print("Enter number of edges: ");
+        int E = sc.nextInt();
+
+        // Step 2: Create adjacency list and in-degree array
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < V; i++) {
+            adj.add(new ArrayList<>());
+        }
+        int[] inDegree = new int[V];
+
+        // Step 3: Read edges
+        System.out.println("Enter edges (from to):");
+        for (int i = 0; i < E; i++) {
+            int from = sc.nextInt();
+            int to = sc.nextInt();
+            adj.get(from).add(to);
+            inDegree[to]++;
+        }
+
+        // Step 4: Perform Kahn’s algorithm
+        List<Integer> topoOrder = new ArrayList<>();
+        Queue<Integer> q = new LinkedList<>();
+
+        // Add all vertices with in-degree 0 to queue
+        for (int i = 0; i < V; i++) {
+            if (inDegree[i] == 0) {
+                q.add(i);
+            }
+        }
+
+        while (!q.isEmpty()) {
+            int node = q.poll();
+            topoOrder.add(node);
+
+            for (int neighbor : adj.get(node)) {
+                inDegree[neighbor]--;
+                if (inDegree[neighbor] == 0) {
+                    q.add(neighbor);
+                }
+            }
+        }
+
+        // Step 5: Check for cycle
+        if (topoOrder.size() != V) {
+            System.out.println("The graph has a cycle. Topological sort not possible.");
+        } else {
+            System.out.println("Topological Sort Order: " + topoOrder);
+        }
+
+        sc.close();
+    }
+}
+Output:
+
+Enter number of vertices: 6
+Enter number of edges: 6
+Enter edges (from to):
+5 2
+5 0
+4 0
+4 1
+2 3
+3 1
+
+Output:
+Topological Sort Order: [4, 5, 2, 3, 1, 0]
+
+Time Complexity Analysis
+Let:
+V = number of vertices
+E = number of edges
+
+1. Building adjacency list and inDegree[]
+You read E edges
+For each edge: adj.get(from).add(to) and inDegree[to]++ → O(1)
+So this step takes O(E) time.
+
+2. Initializing the queue with all 0 in-degree nodes
+Loop over all V vertices → O(V)
+
+3. BFS Traversal (Main Kahn’s Algorithm loop)
+Each vertex is dequeued once → O(V)
+For each vertex, all its adjacent neighbors are visited (i.e., traverse adjacency list) → Total work across all nodes is O(E)
+
+Total Time Complexity:
+O(V+E)
+​
+ 
