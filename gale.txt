@@ -1,0 +1,138 @@
+Input: 
+  - A list of n men and n women
+  - Each man has a preference list ranking all women
+  - Each woman has a preference list ranking all men
+
+Initialize:
+  - All men and women are free
+  - Each man has a list of women he hasn't proposed to yet
+
+While there exists a free man m who hasn’t proposed to every woman:
+  w = highest-ranked woman on m’s preference list he hasn't yet proposed to
+  m proposes to w
+
+  If w is free:
+    (m, w) become engaged
+
+  Else if w prefers m over her current partner m':
+    (m, w) become engaged
+    m' becomes free
+
+  Else:
+    w rejects m
+
+Output:
+  - The set of engaged pairs (m, w), which forms a stable matching
+
+//code 
+import java.util.*;
+
+public class GaleShapley {
+
+    static int N;
+
+    // Function to perform Gale-Shapley Algorithm
+    static void stableMarriage(int[][] menPref, int[][] womenPref) {
+        int[] womenPartner = new int[N]; // womenPartner[i] is the man engaged to woman i
+        boolean[] manFree = new boolean[N]; // manFree[i] is true if man i is free
+        int[] manNextProposal = new int[N]; // Next woman to propose to for each man
+
+        Arrays.fill(womenPartner, -1); // -1 means woman is free
+        Arrays.fill(manFree, true);
+        Arrays.fill(manNextProposal, 0);
+
+        int freeCount = N;
+
+        while (freeCount > 0) {
+            int m;
+            for (m = 0; m < N; m++) {
+                if (manFree[m])
+                    break;
+            }
+
+            int w = menPref[m][manNextProposal[m]]; // Woman to propose to
+            manNextProposal[m]++;
+
+            if (womenPartner[w] == -1) {
+                womenPartner[w] = m;
+                manFree[m] = false;
+                freeCount--;
+            } else {
+                int m1 = womenPartner[w];
+
+                // Check if woman prefers new man m over current partner m1
+                if (prefersNewMan(womenPref[w], m, m1)) {
+                    womenPartner[w] = m;
+                    manFree[m] = false;
+                    manFree[m1] = true;
+                }
+            }
+        }
+
+        // Print final pairings
+        System.out.println("Woman -> Man");
+        for (int i = 0; i < N; i++)
+            System.out.println("  " + i + "    ->   " + womenPartner[i]);
+    }
+
+    // Return true if woman prefers man m over m1
+    static boolean prefersNewMan(int[] prefList, int m, int m1) {
+        for (int man : prefList) {
+            if (man == m)
+                return true;
+            if (man == m1)
+                return false;
+        }
+        return false;
+    }
+
+    // Main function to accept user input
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of men/women (N): ");
+        N = sc.nextInt();
+
+        int[][] menPref = new int[N][N];
+        int[][] womenPref = new int[N][N];
+
+        System.out.println("Enter preferences for " + N + " men (each line: woman indices in preference order):");
+        for (int i = 0; i < N; i++) {
+            System.out.print("Man " + i + ": ");
+            for (int j = 0; j < N; j++) {
+                menPref[i][j] = sc.nextInt();
+            }
+        }
+
+        System.out.println("Enter preferences for " + N + " women (each line: man indices in preference order):");
+        for (int i = 0; i < N; i++) {
+            System.out.print("Woman " + i + ": ");
+            for (int j = 0; j < N; j++) {
+                womenPref[i][j] = sc.nextInt();
+            }
+        }
+
+        stableMarriage(menPref, womenPref);
+
+        sc.close();
+    }
+}
+Output: 
+Enter number of men/women (N): 3
+Enter preferences for 3 men:
+Man 0: 0 1 2
+Man 1: 2 1 0
+Man 2: 1 2 0
+Enter preferences for 3 women:
+Woman 0: 2 1 0
+Woman 1: 0 2 1
+Woman 2: 1 0 2
+
+
+Woman -> Man
+  0    ->   2
+  1    ->   0
+  2    ->   1
+
+Time Complexity:
+O(n²) where n is the number of men/women — because each man can propose to each woman at most once.
