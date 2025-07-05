@@ -1,0 +1,102 @@
+Design Technique Used: Dynamic Programming
+Input:
+    Integer n  // Number of elements in array
+    Integer S  // Target sum
+    Array arr[0..n-1]  // Input array
+
+Output:
+    Boolean indicating if subset sum to S exists
+
+Algorithm:
+1. Create a 2D boolean table dp[0..n][0..S]
+   where dp[i][j] = true if a subset of first i elements has sum j
+
+2. Initialize:
+    For i = 0 to n:
+        dp[i][0] = true       // Sum 0 is possible with empty subset
+    For j = 1 to S:
+        dp[0][j] = false      // No sum > 0 possible with zero elements
+
+3. Fill the table dp[][]:
+    For i = 1 to n:
+        For j = 1 to S:
+            If arr[i-1] <= j:
+                dp[i][j] = dp[i-1][j - arr[i-1]] OR dp[i-1][j]
+            Else:
+                dp[i][j] = dp[i-1][j]
+
+4. Return dp[n][S]
+
+//code
+import java.util.Scanner;
+
+public class SubsetSum {
+    
+    public static boolean isSubsetSum(int[] arr, int n, int sum) {
+        boolean[][] dp = new boolean[n + 1][sum + 1];
+        
+        // If sum is 0, answer is true (empty subset)
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = true;
+        }
+        
+        // Fill the subset table in bottom-up manner
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= sum; j++) {
+                if (arr[i - 1] <= j) {
+                    dp[i][j] = dp[i - 1][j - arr[i - 1]] || dp[i - 1][j];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        
+        return dp[n][sum];
+    }
+    
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter number of elements: ");
+        int n = sc.nextInt();
+        
+        int[] arr = new int[n];
+        System.out.println("Enter elements:");
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
+        }
+        
+        System.out.print("Enter target sum: ");
+        int sum = sc.nextInt();
+        
+        long startTime = System.currentTimeMillis();
+        boolean result = isSubsetSum(arr, n, sum);
+        long endTime = System.currentTimeMillis();
+        
+        if (result) {
+            System.out.println("Subset with sum " + sum + " exists.");
+        } else {
+            System.out.println("No subset with sum " + sum + " exists.");
+        }
+        
+        System.out.println("Execution time: " + (endTime - startTime) + " ms");
+    }
+}
+Enter number of elements: 5
+Enter elements:
+3 34 4 12 5
+Enter target sum: 9
+
+Subset with sum 9 exists.
+Execution time: 1 ms
+
+Time Complexity:
+
+n = number of elements in the array
+S = target sum
+Total Operations:
+Number of cells = (n + 1) * (S + 1).
+
+Each cell is computed once with O(1) work.
+
+overall: O(n*S)
