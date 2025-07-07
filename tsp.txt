@@ -108,3 +108,6 @@ Brute Force Time Complexity:
 O(n!)
 Held-Karp Time Complexity: 
 O(n^2 * 2^n)
+
+
+tsp(i, mask | (1 << i)) represents the cost of visiting the remaining cities in the new mask (after visiting city i)
